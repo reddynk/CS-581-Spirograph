@@ -62,8 +62,6 @@ def generate(teeth_count):
   	[ (.5 * true_tooth_width + addendum * numpy.tan(rad_pressure_angle)) , addendum]
 	])
 
-	outer_circle = Point(0., 0.).buffer(outer_radius)
-
 	poly_list = []
 	prev_X = None
 	l = 2 * true_tooth_width / pitch_radius
@@ -72,11 +70,6 @@ def generate(teeth_count):
 		if prev_X is not None:
 			poly_list.append(MultiPoint([x for x in X] + [x for x in prev_X]).convex_hull)
 		prev_X = X	
-
-	def circle_sector(angle, r):
-		box_a = rotate(box(0., -2 * r, 2 * r, 2 * r), -angle / 2, Point(0., 0.))
-		box_b = rotate(box(-2 * r, -2 * r, 0, 2 * r),  angle / 2, Point(0., 0.))
-		return Point(0., 0.).buffer(r).difference(box_a.union(box_b))
 
 	# Generate a tooth profile
 	tooth_poly = cascaded_union(poly_list)
@@ -96,6 +89,7 @@ def add_holes(poly, inner_radius, hole_list):
 		hole_circle = Point((2*x*inner_radius)-inner_radius, (2*y*inner_radius)-inner_radius).buffer(HOLE_RADIUS)
 		poly = poly.difference(hole_circle)
 	return poly
+
 
 def main():
 
