@@ -24,6 +24,8 @@ PRESSURE_ANGLE = 20.
 FRAME_COUNT = 16 
 # Backlash
 BACKLASH = 0.2
+# Radius of each pencil hole
+HOLE_RADIUS = 2.
 
 def rot_matrix(x):
 	c, s = numpy.cos(x), numpy.sin(x)
@@ -43,7 +45,7 @@ def deg2rad(x):
 	return (numpy.pi / 180) * x
 
 
-
+# Generate a gear with the given number of teeth
 def generate(teeth_count):
 	true_tooth_width = TOOTH_WIDTH - BACKLASH
 	pitch_circumference = true_tooth_width * 2 * teeth_count
@@ -86,13 +88,21 @@ def generate(teeth_count):
 		gear_poly = rotate(gear_poly.difference(tooth_poly), (2 * numpy.pi) / teeth_count, Point(0., 0.), use_radians = True)
 	
 	# Job done
-	return gear_poly, pitch_radius
+	return gear_poly, pitch_radius, pitch_radius - dedendum
 
+# Add a number of pencil circles to the given (inner gear).
+def add_holes(poly, inner_radius, hole_list):
+	for x,y in hole_list:
+		hole_circle = Point((2*x*inner_radius)-inner_radius, (2*y*inner_radius)-inner_radius).buffer(HOLE_RADIUS)
+		poly = poly.difference(hole_circle)
+	return poly
 
 def main():
 
 	# Generate the shape
-	poly, pitch_radius = generate(17)
+	poly, pitch_radius, inner_radius = generate(17)
+	poly = add_holes(poly,inner_radius,[(0.5,0.5),(0.5,0.8),(0.4,0.3)])
+
 
 	fig = plt.figure()
 	ax = fig.add_subplot(111)
