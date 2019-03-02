@@ -115,5 +115,8 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# Virtual Environment
+# Virtual environment
 venv/*
+
+# Generated files
+out

@@ -10,7 +10,20 @@ from shapely.ops import cascaded_union
 from shapely.geometry import Point, MultiPoint, Polygon, box
 from shapely.affinity import rotate, scale, translate
 
+from matplotlib import pyplot as plt
 
+from descartes import PolygonPatch
+
+# These have all been factored out in file wide constants.
+# TODO: Experiment with different settings.
+# Tooth width
+TOOTH_WIDTH = 10.
+# Pressure angle in degrees
+PRESSURE_ANGLE = 20.
+# Number of frames used to build the involute
+FRAME_COUNT = 16 
+# Backlash
+BACKLASH = 0.2
 
 def rot_matrix(x):
 	c, s = numpy.cos(x), numpy.sin(x)
@@ -31,32 +44,28 @@ def deg2rad(x):
 
 
 
-def generate(teeth_count = 8,
-             tooth_width = 1.,
-             pressure_angle = deg2rad(20.),
-             backlash = 0.,
-             frame_count = 16):
-	tooth_width -= backlash
-	pitch_circumference = tooth_width * 2 * teeth_count
+def generate(teeth_count):
+	true_tooth_width = TOOTH_WIDTH - BACKLASH
+	pitch_circumference = true_tooth_width * 2 * teeth_count
 	pitch_radius = pitch_circumference / (2 * numpy.pi)
-	addendum = tooth_width * (2 / numpy.pi)
+	rad_pressure_angle = deg2rad(PRESSURE_ANGLE)
+	addendum = true_tooth_width * (2 / numpy.pi)
 	dedendum = addendum
 	outer_radius = pitch_radius + addendum
-	print pitch_radius - dedendum
 	# Tooth profile
 	profile = numpy.array([
-  	[-(.5 * tooth_width + addendum * numpy.tan(pressure_angle)),  addendum],
-  	[-(.5 * tooth_width - dedendum * numpy.tan(pressure_angle)), -dedendum],
-  	[ (.5 * tooth_width - dedendum * numpy.tan(pressure_angle)), -dedendum],
-  	[ (.5 * tooth_width + addendum * numpy.tan(pressure_angle)) , addendum]
+  	[-(.5 * true_tooth_width + addendum * numpy.tan(rad_pressure_angle)),  addendum],
+  	[-(.5 * true_tooth_width - dedendum * numpy.tan(rad_pressure_angle)), -dedendum],
+  	[ (.5 * true_tooth_width - dedendum * numpy.tan(rad_pressure_angle)), -dedendum],
+  	[ (.5 * true_tooth_width + addendum * numpy.tan(rad_pressure_angle)) , addendum]
 	])
 
 	outer_circle = Point(0., 0.).buffer(outer_radius)
 
 	poly_list = []
 	prev_X = None
-	l = 2 * tooth_width / pitch_radius
-	for theta in numpy.linspace(0, l, frame_count):
+	l = 2 * true_tooth_width / pitch_radius
+	for theta in numpy.linspace(0, l, FRAME_COUNT):
 		X = rotation(profile + numpy.array((-theta * pitch_radius, pitch_radius)), theta)
 		if prev_X is not None:
 			poly_list.append(MultiPoint([x for x in X] + [x for x in prev_X]).convex_hull)
@@ -80,40 +89,24 @@ def generate(teeth_count = 8,
 	return gear_poly, pitch_radius
 
 
-
 def main():
-	# Command line parsing
-	parser = argparse.ArgumentParser(description = 'Generate 2d spur gears profiles')
-	parser.add_argument('-c', '--teeth-count', type = int, default = 17, help = 'Teeth count')
-	parser.add_argument('-w', '--tooth-width', type = float, default = 10., help = 'Tooth width')
-	parser.add_argument('-p', '--pressure-angle', type = float, default = 20., help = 'Pressure angle in degrees')
-	parser.add_argument('-n', '--frame-count', type = int, default = 16, help = 'Number of frames used to build the involute')
-	parser.add_argument('-b', '--backlash', type = float, default = 0.2, help = 'Backlash')
-	parser.add_argument('-t', '--output-type', choices = ['dxf', 'text'], default = 'dxf', help = 'Output type')
-	parser.add_argument('-o', '--output-path', default = 'out', help = 'Output file')
-	args = parser.parse_args()
-
-	# Input parameters safety checks
-	if args.teeth_count <= 0:
-		sys.stderr.write('Invalid teeth count\n')
-		sys.exit(1)
 
 	# Generate the shape
-	poly, pitch_radius = generate(args.teeth_count,
-	                              args.tooth_width,
-	                              deg2rad(args.pressure_angle),
-	                              args.backlash,
-	                              args.frame_count)
+	poly, pitch_radius = generate(17)
 
-	# Write the shape to the output
-	print 'pitch radius =', pitch_radius
+	fig = plt.figure()
+	ax = fig.add_subplot(111)
+	ax.add_patch(PolygonPatch(poly))
+	
+	# The pitch_radius is the distance from the center to the farthest point
+	# on a tooth. Therefore, make the size of the axis just a bit bigger.
+	axis_size = round(pitch_radius) * 1.25
+	ax.axis((-axis_size,axis_size,-axis_size,axis_size))
+	print("HERE")
+	ax.set_title('Inner Gear')
+	ax.set_aspect(1)
 
-	with open(args.output_path, 'w') as f:
-		if args.output_type == 'dxf':
-			backends.dxf.write(f, poly)
-		elif args.output_type == 'text':
-			backends.text.write(f, poly)
-
+	plt.show()
 
 
 if __name__ == '__main__':
