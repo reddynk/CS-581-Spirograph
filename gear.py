@@ -60,22 +60,18 @@ def calculate_gear_setup(tooth_width, teeth_count):
 def generate_inner_gear(teeth_count):
     true_tooth_width, pitch_radius, addendum = calculate_gear_setup(
         TOOTH_WIDTH, teeth_count)
-    dedendum = addendum
+    dedendum = 1.25*addendum
     outer_radius = pitch_radius + addendum
 
     rad_pressure_angle = deg2rad(PRESSURE_ANGLE)
 
     # Tooth profile
-    profile = numpy.array([[
-        -(.5 * true_tooth_width + addendum * numpy.tan(rad_pressure_angle)),
-        addendum
-    ], [
-        -(.5 * true_tooth_width - dedendum * numpy.tan(rad_pressure_angle)),
-        -dedendum
-    ], [(.5 * true_tooth_width - dedendum * numpy.tan(rad_pressure_angle)),
-        -dedendum
-        ], [(.5 * true_tooth_width + addendum * numpy.tan(rad_pressure_angle)),
-            addendum]])
+    profile = numpy.array([
+      [-(.5 * true_tooth_width + addendum * numpy.tan(rad_pressure_angle)),  addendum],
+      [-(.5 * true_tooth_width - dedendum * numpy.tan(rad_pressure_angle)), -dedendum],
+      [ (.5 * true_tooth_width - dedendum * numpy.tan(rad_pressure_angle)), -dedendum],
+      [ (.5 * true_tooth_width + addendum * numpy.tan(rad_pressure_angle)) , addendum]
+    ]) # yapf: disable
 
     poly_list = []
     prev_X = None
@@ -106,26 +102,23 @@ def generate_inner_gear(teeth_count):
 
 # Generate a gear with the given number of teeth
 def generate_outer_gear(teeth_count):
-    true_tooth_width = TOOTH_WIDTH - BACKLASH
-    pitch_circumference = true_tooth_width * 2 * teeth_count
-    pitch_radius = pitch_circumference / (2 * numpy.pi)
-    rad_pressure_angle = deg2rad(PRESSURE_ANGLE)
-    addendum = true_tooth_width * (2 / numpy.pi)
+    true_tooth_width, pitch_radius, addendum = calculate_gear_setup(
+        TOOTH_WIDTH, teeth_count)
+    print(true_tooth_width)
+
     dedendum = addendum
     outer_radius = pitch_radius + addendum
     inner_radius = pitch_radius - dedendum
+    
+    rad_pressure_angle = deg2rad(PRESSURE_ANGLE)
 
     # Tooth profile
-    profile = numpy.array([[
-        -(.5 * true_tooth_width + addendum * numpy.tan(rad_pressure_angle)),
-        addendum
-    ], [
-        -(.5 * true_tooth_width - dedendum * numpy.tan(rad_pressure_angle)),
-        -dedendum
-    ], [(.5 * true_tooth_width - dedendum * numpy.tan(rad_pressure_angle)),
-        -dedendum
-        ], [(.5 * true_tooth_width + addendum * numpy.tan(rad_pressure_angle)),
-            addendum]])
+    profile = numpy.array([
+      [-(.5 * true_tooth_width + addendum * numpy.tan(rad_pressure_angle)),  addendum],
+      [-(.5 * true_tooth_width - dedendum * numpy.tan(rad_pressure_angle)), -dedendum],
+      [ (.5 * true_tooth_width - dedendum * numpy.tan(rad_pressure_angle)), -dedendum],
+      [ (.5 * true_tooth_width + addendum * numpy.tan(rad_pressure_angle)) , addendum]
+    ]) # yapf: disable
 
     poly_list = []
     prev_X = None
@@ -184,41 +177,31 @@ def add_gear_figure(poly, outer_radius, gear_name):
 
 
 def main():
-
     # Generate the shape
-    inner_poly, outer_radius = generate_inner_gear(17)
-    add_gear_figure(inner_poly, outer_radius, "Inner Gear")
+    inner_poly, outer_radius = generate_inner_gear(30)
     # poly = add_holes(poly,inner_radius,[(0.5,0.5),(0.5,0.8),(0.4,0.3)])
 
-    tooth_poly, gear_poly = generate_outer_gear(17)
+    tooth_poly, gear_poly = generate_outer_gear(45)
 
-    # fig = plt.figure()
-    # ax = fig.add_subplot(131)
-    # axis_size = round(pitch_radius) * 1.25
-    # ax.axis((-axis_size,axis_size,-axis_size,axis_size))
-    # ax.set_aspect(1)
-    # ax.add_patch(PolygonPatch(inner_poly))
+    fig = plt.figure()
+    ax = fig.add_subplot(121)
+    axis_size = round(outer_radius) * 2
+    ax.axis((-axis_size, axis_size, -axis_size, axis_size))
+    ax.set_aspect(1)
+    ax.add_patch(PolygonPatch(inner_poly))
 
-    # ax = fig.add_subplot(132)
-    # axis_size = round(pitch_radius) * 1.25
-    # ax.axis((-axis_size,axis_size,-axis_size,axis_size))
+    # ax = fig.add_subplot(122)
+    # axis_size = round(outer_radius) * 2
+    # ax.axis((-axis_size, axis_size, -axis_size, axis_size))
     # ax.set_aspect(1)
     # ax.add_patch(PolygonPatch(tooth_poly))
 
-    # # TODO: The reason the outer gear teeth are all messed up is because the
-    # # space between the tooth polys are insufficient. When we point outwards,
-    # # this is handled by the different of the circle's radius at the inside
-    # # point (where the gear tooth meets the circle) and the outside point
-    # # (where the tooth meets open space). Therefore, we must give each tooth
-    # # a buffer some fraction of the difference of these two circumferences.
-    # ax = fig.add_subplot(133)
-    # axis_size = round(pitch_radius) * 1.25
-    # ax.axis((-axis_size,axis_size,-axis_size,axis_size))
-    # ax.set_aspect(1)
-    # ax.add_patch(PolygonPatch(gear_poly))
+    ax = fig.add_subplot(122)
+    axis_size = round(outer_radius) * 2
+    ax.axis((-axis_size, axis_size, -axis_size, axis_size))
+    ax.set_aspect(1)
+    ax.add_patch(PolygonPatch(gear_poly))
 
-    # The pitch_radius is the distance from the center to the farthest point
-    # on a tooth. Therefore, make the size of the axis just a bit bigger.
     print("HERE")
     # ax.set_title(gear_name)
 
