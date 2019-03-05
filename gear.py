@@ -3,8 +3,8 @@ import numpy
 import argparse
 import itertools
 
-import backends.dxf
-import backends.text
+#import backends.dxf
+#import backends.text
 
 from shapely.ops import cascaded_union
 from shapely.geometry import Point, MultiPoint, Polygon, box
@@ -62,7 +62,8 @@ def generate_inner_gear(teeth_count):
         TOOTH_WIDTH, teeth_count)
     dedendum = 1.25*addendum
     outer_radius = pitch_radius + addendum
-
+    inner_radius = pitch_radius - dedendum
+    
     rad_pressure_angle = deg2rad(PRESSURE_ANGLE)
 
     # Tooth profile
@@ -97,59 +98,17 @@ def generate_inner_gear(teeth_count):
             use_radians=True)
 
     # Job done
-    return gear_poly, outer_radius
+    return gear_poly, outer_radius, inner_radius
 
 
 # Generate a gear with the given number of teeth
 def generate_outer_gear(teeth_count):
-    true_tooth_width, pitch_radius, addendum = calculate_gear_setup(
-        TOOTH_WIDTH, teeth_count)
-    print(true_tooth_width)
-
-    dedendum = addendum
-    outer_radius = pitch_radius + addendum
-    inner_radius = pitch_radius - dedendum
-    
-    rad_pressure_angle = deg2rad(PRESSURE_ANGLE)
-
-    # Tooth profile
-    profile = numpy.array([
-      [-(.5 * true_tooth_width + addendum * numpy.tan(rad_pressure_angle)),  addendum],
-      [-(.5 * true_tooth_width - dedendum * numpy.tan(rad_pressure_angle)), -dedendum],
-      [ (.5 * true_tooth_width - dedendum * numpy.tan(rad_pressure_angle)), -dedendum],
-      [ (.5 * true_tooth_width + addendum * numpy.tan(rad_pressure_angle)) , addendum]
-    ]) # yapf: disable
-
-    poly_list = []
-    prev_X = None
-    l = 2 * true_tooth_width / pitch_radius
-    for theta in numpy.linspace(0, l, FRAME_COUNT):
-        X = rotation(profile + numpy.array(
-            (-theta * pitch_radius, pitch_radius)), theta)
-        if prev_X is not None:
-            poly_list.append(
-                MultiPoint([x for x in X] + [x for x in prev_X]).convex_hull)
-        prev_X = X
-
-    # Generate a tooth profile
-    tooth_poly = cascaded_union(poly_list)
-    tooth_poly = tooth_poly.union(scale(tooth_poly, -1, 1, 1, Point(0., 0.)))
-    tooth_poly = scale(tooth_poly, 1, -1, 1)
-    tooth_poly = translate(tooth_poly, 0, -addendum, 0)
-
-    # Generate the full gear
-    gear_poly = Point(0., 0.).buffer(outer_radius + 10)
-    for i in range(0, teeth_count):
-        gear_poly = rotate(
-            gear_poly.difference(tooth_poly), (2 * numpy.pi) / teeth_count,
-            Point(0., 0.),
-            use_radians=True)
-
-    # Now remove the inner portion where the concentric gear fits
-    gear_poly = gear_poly.difference(Point(0., 0.).buffer(inner_radius))
-
-    # Job done
-    return tooth_poly, gear_poly
+    poly, outer_radius, inner_radius = generate_inner_gear(teeth_count)
+    #TODO: play with this value, depending on stability of outer gear after cutting
+    excess_width = 10
+    frame = Point(0, 0).buffer(outer_radius + excess_width)
+    poly = frame.difference(poly)
+    return poly, outer_radius
 
 
 # Add a number of pencil circles to the given (inner gear).
@@ -175,17 +134,17 @@ def add_gear_figure(poly, outer_radius, gear_name):
     ax.set_title(gear_name)
     ax.set_aspect(1)
 
-
 def main():
     # Generate the shape
-    inner_poly, outer_radius = generate_inner_gear(30)
-    # poly = add_holes(poly,inner_radius,[(0.5,0.5),(0.5,0.8),(0.4,0.3)])
-
-    tooth_poly, gear_poly = generate_outer_gear(45)
+    inner_poly, outer_radius_innergear, inner_radius = generate_inner_gear(30)
+    inner_poly = add_holes(inner_poly,inner_radius,[(0.5,0.5),(0.5,0.8),(0.4,0.3)])
+    print(inner_radius, outer_radius_innergear)
+    outer_poly, outer_radius_outergear = generate_outer_gear(75)
+    print(outer_radius_outergear)
 
     fig = plt.figure()
     ax = fig.add_subplot(121)
-    axis_size = round(outer_radius) * 2
+    axis_size = round(outer_radius_innergear) * 2
     ax.axis((-axis_size, axis_size, -axis_size, axis_size))
     ax.set_aspect(1)
     ax.add_patch(PolygonPatch(inner_poly))
@@ -197,10 +156,10 @@ def main():
     # ax.add_patch(PolygonPatch(tooth_poly))
 
     ax = fig.add_subplot(122)
-    axis_size = round(outer_radius) * 2
+    axis_size = round(outer_radius_outergear) * 2
     ax.axis((-axis_size, axis_size, -axis_size, axis_size))
     ax.set_aspect(1)
-    ax.add_patch(PolygonPatch(gear_poly))
+    ax.add_patch(PolygonPatch(outer_poly))
 
     print("HERE")
     # ax.set_title(gear_name)
