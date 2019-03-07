@@ -120,3 +120,6 @@ venv/*
 
 # Generated files
 out
+
+# Spirograph SVG files
+*.svg

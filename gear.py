@@ -14,6 +14,8 @@ from matplotlib import pyplot as plt
 
 from descartes import PolygonPatch
 
+import svg
+
 # These have all been factored out in file wide constants.
 # TODO: Experiment with different settings.
 # Tooth width
@@ -27,6 +29,8 @@ BACKLASH = 0.2
 # Radius of each pencil hole
 HOLE_RADIUS = 2.
 
+# Visual buffer used for display
+BUFFER_FACTOR = 1.1
 
 def rot_matrix(x):
     c, s = numpy.cos(x), numpy.sin(x)
@@ -128,9 +132,8 @@ def add_gear_figure(poly, outer_radius, gear_name):
 
     # The outer_radius is the distance from the center to the farthest point
     # on a tooth. Therefore, make the size of the axis just a bit bigger.
-    axis_size = round(outer_radius) * 1.1
+    axis_size = round(outer_radius) * BUFFER_FACTOR
     ax.axis((-axis_size, axis_size, -axis_size, axis_size))
-    print("HERE")
     ax.set_title(gear_name)
     ax.set_aspect(1)
 
@@ -138,35 +141,15 @@ def main():
     # Generate the shape
     inner_poly, outer_radius_innergear, inner_radius = generate_inner_gear(30)
     inner_poly = add_holes(inner_poly,inner_radius,[(0.5,0.5),(0.5,0.8),(0.4,0.3)])
-    print(inner_radius, outer_radius_innergear)
+    add_gear_figure(inner_poly,outer_radius_innergear,"Inner Gear")
+
     outer_poly, outer_radius_outergear = generate_outer_gear(75)
-    print(outer_radius_outergear)
+    add_gear_figure(outer_poly,outer_radius_outergear,"Outer Gear")
 
-    fig = plt.figure()
-    ax = fig.add_subplot(121)
-    axis_size = round(outer_radius_innergear) * 2
-    ax.axis((-axis_size, axis_size, -axis_size, axis_size))
-    ax.set_aspect(1)
-    ax.add_patch(PolygonPatch(inner_poly))
+    # plt.show()
 
-    # ax = fig.add_subplot(122)
-    # axis_size = round(outer_radius) * 2
-    # ax.axis((-axis_size, axis_size, -axis_size, axis_size))
-    # ax.set_aspect(1)
-    # ax.add_patch(PolygonPatch(tooth_poly))
-
-    ax = fig.add_subplot(122)
-    axis_size = round(outer_radius_outergear) * 2
-    ax.axis((-axis_size, axis_size, -axis_size, axis_size))
-    ax.set_aspect(1)
-    ax.add_patch(PolygonPatch(outer_poly))
-
-    print("HERE")
-    # ax.set_title(gear_name)
-
-    # add_gear_figure(poly,pitch_radius,"Outer Gear")
-
-    plt.show()
+    svg.create("inner_gear", translate(inner_poly,outer_radius_innergear * BUFFER_FACTOR,outer_radius_innergear * BUFFER_FACTOR))
+    svg.create("outer_gear", translate(outer_poly,outer_radius_outergear * BUFFER_FACTOR,outer_radius_outergear * BUFFER_FACTOR))
 
 
 if __name__ == '__main__':
