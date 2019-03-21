@@ -123,3 +123,6 @@ out
 
 # Spirograph SVG files
 *.svg
+
+# Spirograph PDF files
+*.pdf

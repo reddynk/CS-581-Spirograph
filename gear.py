@@ -3,9 +3,6 @@ import numpy
 import argparse
 import itertools
 
-#import backends.dxf
-#import backends.text
-
 from shapely.ops import cascaded_union
 from shapely.geometry import Point, MultiPoint, Polygon, box
 from shapely.affinity import rotate, scale, translate
@@ -14,7 +11,9 @@ from matplotlib import pyplot as plt
 
 from descartes import PolygonPatch
 
-import svg
+import pdf
+
+# TODO: Make some class that takes a poly and a radius. Pass that to pdf.py
 
 # These have all been factored out in file wide constants.
 # TODO: Experiment with different settings.
@@ -27,10 +26,13 @@ FRAME_COUNT = 16
 # Backlash
 BACKLASH = 0.2
 # Radius of each pencil hole
-HOLE_RADIUS = 2.
+HOLE_RADIUS = 4.
 
 # Visual buffer used for display
 BUFFER_FACTOR = 1.1
+
+# Scale factor used for lasercut pdfs
+SCALE_FACTOR = .5
 
 def rot_matrix(x):
     c, s = numpy.cos(x), numpy.sin(x)
@@ -148,8 +150,8 @@ def main():
 
     # plt.show()
 
-    svg.create("inner_gear", translate(inner_poly,outer_radius_innergear * BUFFER_FACTOR,outer_radius_innergear * BUFFER_FACTOR))
-    svg.create("outer_gear", translate(outer_poly,outer_radius_outergear * BUFFER_FACTOR,outer_radius_outergear * BUFFER_FACTOR))
+    pdf.create("inner_gear", inner_poly, outer_radius_innergear, SCALE_FACTOR)
+    pdf.create("outer_gear", outer_poly, outer_radius_outergear, SCALE_FACTOR)
 
 
 if __name__ == '__main__':
