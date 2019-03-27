@@ -11,6 +11,8 @@ from matplotlib import pyplot as plt
 
 from descartes import PolygonPatch
 
+import simulate
+
 import pdf
 
 # TODO: Make some class that takes a poly and a radius. Pass that to pdf.py
@@ -141,17 +143,20 @@ def add_gear_figure(poly, outer_radius, gear_name):
 
 def main():
     # Generate the shape
-    inner_poly, outer_radius_innergear, inner_radius = generate_inner_gear(30)
+    inner_poly, outer_radius_innergear, inner_radius = generate_inner_gear(42)
     inner_poly = add_holes(inner_poly,inner_radius,[(0.5,0.5),(0.5,0.8),(0.4,0.3)])
-    add_gear_figure(inner_poly,outer_radius_innergear,"Inner Gear")
+    # add_gear_figure(inner_poly,outer_radius_innergear,"Inner Gear")
 
-    outer_poly, outer_radius_outergear = generate_outer_gear(75)
-    add_gear_figure(outer_poly,outer_radius_outergear,"Outer Gear")
+    outer_poly, outer_radius_outergear = generate_outer_gear(96)
+    # add_gear_figure(outer_poly,outer_radius_outergear,"Outer Gear")
 
     # plt.show()
 
-    pdf.create("inner_gear", inner_poly, outer_radius_innergear, SCALE_FACTOR)
-    pdf.create("outer_gear", outer_poly, outer_radius_outergear, SCALE_FACTOR)
+
+    simulate.simulate(outer_radius_innergear,outer_radius_outergear)
+
+    # pdf.create("inner_gear", inner_poly, outer_radius_innergear, SCALE_FACTOR)
+    # pdf.create("outer_gear", outer_poly, outer_radius_outergear, SCALE_FACTOR)
 
 
 if __name__ == '__main__':
