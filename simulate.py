@@ -1,6 +1,8 @@
 import shapely.geometry as geom
 import shapely.affinity as affin
 
+import numpy as np
+
 from matplotlib import pyplot as plt
 
 from descartes import PolygonPatch
@@ -22,23 +24,25 @@ def add_gear_figure(poly, outer_radius, gear_name):
 
     plt.show()
 
-def simulate(radius_small, radius_big):
+def simulate(inner_teeth, outer_teeth):
     points = []
     total_rads = 0
-    pencil_radius = .5*radius_small
-    r_diff = radius_big - radius_small
+    pencil_radius = .5*inner_teeth
+    r_diff = outer_teeth - inner_teeth
 
-    print(radius_small,radius_big)
+    print(inner_teeth,outer_teeth)
+    lcm = np.lcm(inner_teeth,outer_teeth)
+    rotations = lcm/inner_teeth
 
-    while total_rads < 6*math.pi:
-        x = r_diff * math.cos(total_rads) + pencil_radius * math.cos((r_diff/radius_small)*total_rads)
-        y = r_diff * math.sin(total_rads) - pencil_radius * math.sin((r_diff/radius_small)*total_rads)
+    while total_rads < rotations*2*math.pi:
+        x = r_diff * math.cos(total_rads) + pencil_radius * math.cos((r_diff/inner_teeth)*total_rads)
+        y = r_diff * math.sin(total_rads) - pencil_radius * math.sin((r_diff/inner_teeth)*total_rads)
         points.append((x,y))
         total_rads += THETA_STEP
 
     line = geom.LineString(points).buffer(.01)
 
-    add_gear_figure(line,radius_big,"Test")
+    add_gear_figure(line,outer_teeth,"Test")
 
 # simulate(40,96)
 

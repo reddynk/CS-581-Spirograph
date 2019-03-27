@@ -143,17 +143,19 @@ def add_gear_figure(poly, outer_radius, gear_name):
 
 def main():
     # Generate the shape
-    inner_poly, outer_radius_innergear, inner_radius = generate_inner_gear(42)
+    inner_teeth = 42
+    inner_poly, outer_radius_innergear, inner_radius = generate_inner_gear(inner_teeth)
     inner_poly = add_holes(inner_poly,inner_radius,[(0.5,0.5),(0.5,0.8),(0.4,0.3)])
     # add_gear_figure(inner_poly,outer_radius_innergear,"Inner Gear")
 
-    outer_poly, outer_radius_outergear = generate_outer_gear(96)
+    outer_teeth = 96
+    outer_poly, outer_radius_outergear = generate_outer_gear(42)
     # add_gear_figure(outer_poly,outer_radius_outergear,"Outer Gear")
 
     # plt.show()
 
 
-    simulate.simulate(outer_radius_innergear,outer_radius_outergear)
+    simulate.simulate(inner_teeth,outer_teeth)
 
     # pdf.create("inner_gear", inner_poly, outer_radius_innergear, SCALE_FACTOR)
     # pdf.create("outer_gear", outer_poly, outer_radius_outergear, SCALE_FACTOR)
