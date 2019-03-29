@@ -2,9 +2,10 @@ import sys
 import numpy
 import argparse
 import itertools
+import math
 
 from shapely.ops import cascaded_union
-from shapely.geometry import Point, MultiPoint, Polygon, box
+from shapely.geometry import Point, MultiPoint, Polygon, box, LineString
 from shapely.affinity import rotate, scale, translate
 
 from matplotlib import pyplot as plt
@@ -28,7 +29,9 @@ FRAME_COUNT = 16
 # Backlash
 BACKLASH = 0.2
 # Radius of each pencil hole
-HOLE_RADIUS = 4.
+HOLE_RADIUS = 5
+#Added width to outer gear
+EXCESS_WIDTH = 20
 
 # Visual buffer used for display
 BUFFER_FACTOR = 1.1
@@ -112,20 +115,26 @@ def generate_inner_gear(teeth_count):
 # Generate a gear with the given number of teeth
 def generate_outer_gear(teeth_count):
     poly, outer_radius, inner_radius = generate_inner_gear(teeth_count)
-    #TODO: play with this value, depending on stability of outer gear after cutting
-    excess_width = 10
-    frame = Point(0, 0).buffer(outer_radius + excess_width)
+    frame = Point(0, 0).buffer(outer_radius + EXCESS_WIDTH)
     poly = frame.difference(poly)
     return poly, outer_radius
 
 
 # Add a number of pencil circles to the given (inner gear).
 def add_holes(poly, inner_radius, hole_list):
-    for x, y in hole_list:
+    
+    '''for x, y in hole_list:
         hole_circle = Point(
             (2 * x * inner_radius) - inner_radius,
             (2 * y * inner_radius) - inner_radius).buffer(HOLE_RADIUS)
+        poly = poly.difference(hole_circle)'''
+
+    for prop, theta in hole_list:
+        r = prop * inner_radius
+        hole_circle = Point(
+            r * math.cos(theta), r*math.sin(theta)).buffer(HOLE_RADIUS)
         poly = poly.difference(hole_circle)
+
     return poly
 
 
@@ -145,17 +154,22 @@ def main():
     # Generate the shape
     inner_teeth = 42
     inner_poly, outer_radius_innergear, inner_radius = generate_inner_gear(inner_teeth)
-    inner_poly = add_holes(inner_poly,inner_radius,[(0.5,0.5),(0.5,0.8),(0.4,0.3)])
-    # add_gear_figure(inner_poly,outer_radius_innergear,"Inner Gear")
+    inner_poly = add_holes(inner_poly,inner_radius,[(0.25, 0), (0.8, 3*math.pi / 4), (0.45, 7*math.pi/2)])
+    #might need to change width of mark created
+    mark = LineString([Point(inner_radius + 5, 0), Point(outer_radius_innergear - 5, 0)]).buffer(2)
+    inner_poly = inner_poly.difference(mark)
+    add_gear_figure(inner_poly,outer_radius_innergear,"Inner Gear")
 
     outer_teeth = 96
     outer_poly, outer_radius_outergear = generate_outer_gear(42)
-    # add_gear_figure(outer_poly,outer_radius_outergear,"Outer Gear")
+    mark = LineString([Point(outer_radius_outergear + 7, 0), Point(outer_radius_outergear + EXCESS_WIDTH - 7, 0)]).buffer(2)
+    outer_poly = outer_poly.difference(mark)
+    add_gear_figure(outer_poly,outer_radius_outergear,"Outer Gear")
 
-    # plt.show()
+    plt.show()
 
 
-    simulate.simulate(inner_teeth,outer_teeth)
+    #simulate.simulate(inner_teeth,outer_teeth)
 
     # pdf.create("inner_gear", inner_poly, outer_radius_innergear, SCALE_FACTOR)
     # pdf.create("outer_gear", outer_poly, outer_radius_outergear, SCALE_FACTOR)
