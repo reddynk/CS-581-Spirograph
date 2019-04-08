@@ -30,7 +30,7 @@ def simulate(inner_teeth, outer_teeth):
     pencil_radius = .5*inner_teeth
     r_diff = outer_teeth - inner_teeth
 
-    print(inner_teeth,outer_teeth)
+    #print(inner_teeth,outer_teeth)
     lcm = np.lcm(inner_teeth,outer_teeth)
     rotations = lcm/inner_teeth
 
@@ -44,5 +44,4 @@ def simulate(inner_teeth, outer_teeth):
 
     add_gear_figure(line,outer_teeth,"Test")
 
-# simulate(40,96)
 

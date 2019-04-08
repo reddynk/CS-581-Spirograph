@@ -16,6 +16,8 @@ import simulate
 
 import pdf
 
+import backwards
+
 # TODO: Make some class that takes a poly and a radius. Pass that to pdf.py
 
 # These have all been factored out in file wide constants.
@@ -158,18 +160,20 @@ def main():
     #might need to change width of mark created
     mark = LineString([Point(inner_radius + 5, 0), Point(outer_radius_innergear - 5, 0)]).buffer(2)
     inner_poly = inner_poly.difference(mark)
-    add_gear_figure(inner_poly,outer_radius_innergear,"Inner Gear")
+    #add_gear_figure(inner_poly,outer_radius_innergear,"Inner Gear")
 
     outer_teeth = 96
     outer_poly, outer_radius_outergear = generate_outer_gear(42)
     mark = LineString([Point(outer_radius_outergear + 7, 0), Point(outer_radius_outergear + EXCESS_WIDTH - 7, 0)]).buffer(2)
     outer_poly = outer_poly.difference(mark)
-    add_gear_figure(outer_poly,outer_radius_outergear,"Outer Gear")
+    #add_gear_figure(outer_poly,outer_radius_outergear,"Outer Gear")
 
-    plt.show()
+    #plt.show()
 
 
     #simulate.simulate(inner_teeth,outer_teeth)
+
+    backwards.process()
 
     # pdf.create("inner_gear", inner_poly, outer_radius_innergear, SCALE_FACTOR)
     # pdf.create("outer_gear", outer_poly, outer_radius_outergear, SCALE_FACTOR)
