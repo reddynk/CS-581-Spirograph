@@ -200,7 +200,7 @@ def main():
                                                       (0.45, 5 * math.pi / 2)])
     add_gear_figure(inner_poly, outer_radius_innergear, "Inner Gear")
 
-    outer_teeth = 10
+    outer_teeth = 96
     outer_poly, outer_radius_outergear = generate_outer_gear(outer_teeth)
     add_gear_figure(outer_poly, outer_radius_outergear, "Outer Gear")
 
