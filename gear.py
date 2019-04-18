@@ -204,13 +204,13 @@ def main():
     outer_poly, outer_radius_outergear = generate_outer_gear(outer_teeth)
     # add_gear_figure(outer_poly, outer_radius_outergear, "Outer Gear")
 
-    plt.show()
+    # plt.show()
 
-    # simulate.simulate(inner_teeth,outer_teeth)
+    simulate.simulate(inner_teeth,outer_teeth, 0)
 
     # backwards.process()
 
-    pdf.create("gear_set", outer_radius_outergear, outer_poly, inner_poly, SCALE_FACTOR)
+    # pdf.create("spirograph_set", outer_radius_outergear, outer_poly, inner_poly, SCALE_FACTOR)
 
 
 if __name__ == '__main__':
