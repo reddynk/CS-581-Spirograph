@@ -70,6 +70,23 @@ def calculate_gear_setup(tooth_width, teeth_count):
     return true_tooth_width, pitch_radius, addendum
 
 
+def create_mark(radius, addendum, tooth_width, teeth_count, is_inner_mark):
+    mark = Point(0, 0)
+    if is_inner_mark:
+        mark = LineString([Point(0, radius),
+                           Point(0, radius + addendum)]).buffer(
+                               tooth_width / 5)
+    else:
+        mark = LineString([
+            Point(0, radius + (.75 * addendum)),
+            Point(0, radius + (1.75 * addendum))
+        ]).buffer(tooth_width / 5)
+
+    mark = rotate(
+        mark, (numpy.pi) / teeth_count, Point(0., 0.), use_radians=True)
+    return mark
+
+
 # Generate a gear with the given number of teeth
 def generate_inner_gear(teeth_count, add_inner_mark=True):
     true_tooth_width, pitch_radius, addendum = calculate_gear_setup(
@@ -105,7 +122,7 @@ def generate_inner_gear(teeth_count, add_inner_mark=True):
 
     # Generate the full gear
     gear_poly = Point(0., 0.).buffer(outer_radius)
-    
+
     for i in range(0, teeth_count):
         gear_poly = rotate(
             gear_poly.difference(tooth_poly), (2 * numpy.pi) / teeth_count,
@@ -113,38 +130,35 @@ def generate_inner_gear(teeth_count, add_inner_mark=True):
             use_radians=True)
 
     if add_inner_mark:
-        # Create the mark on the topmost tooth.
-        mark = LineString(
-            [Point(0, inner_radius),
-             Point(0, inner_radius + addendum)]).buffer(true_tooth_width / 5)
-        mark = rotate(
-            mark, (numpy.pi) / teeth_count, Point(0., 0.), use_radians=True)
-        gear_poly = gear_poly.difference(mark)
+        # Create the mark in the topmost tooth.
+        gear_poly = gear_poly.difference(
+            create_mark(inner_radius, addendum, true_tooth_width, teeth_count,
+                        True))
     else:
-        mark = LineString(
-            [Point(0, outer_radius + (.75 * addendum)),
-             Point(0, outer_radius + (1.75 * addendum))]).buffer(true_tooth_width / 5)
-        mark = rotate(
-            mark, (numpy.pi) / teeth_count, Point(0., 0.), use_radians=True)
-        gear_poly = gear_poly.union(mark)
+        # Create the mark just beyond the topmost tooth.
+        gear_poly = gear_poly.union(
+            create_mark(outer_radius, addendum, true_tooth_width, teeth_count,
+                        False))
 
     # Job done
     return gear_poly, outer_radius, inner_radius
 
+
 # TODO: Take width of square as an argument.
 # Generate a gear with the given number of teeth
-def generate_outer_gear(teeth_count, side_length = None):
+def generate_outer_gear(teeth_count, side_length=None):
     cutout, outer_radius, inner_radius = generate_inner_gear(
         teeth_count, add_inner_mark=False)
 
     if not side_length:
         thickness = max(outer_radius * THICKNESS_RATIO, MIN_WIDTH)
         side_length = (outer_radius + thickness) * 2
-    
-    frame = box(-side_length/2, -side_length/2, side_length/2, side_length/2)
+
+    frame = box(-side_length / 2, -side_length / 2, side_length / 2,
+                side_length / 2)
     poly = frame.difference(cutout)
 
-    return poly, side_length/2
+    return poly, side_length / 2
 
 
 # Add a number of pencil circles to the given (inner gear).
@@ -188,14 +202,11 @@ def main():
 
     outer_teeth = 10
     outer_poly, outer_radius_outergear = generate_outer_gear(outer_teeth)
-    add_gear_figure(outer_poly,outer_radius_outergear,"Outer Gear")
+    add_gear_figure(outer_poly, outer_radius_outergear, "Outer Gear")
 
     plt.show()
 
     # simulate.simulate(inner_teeth,outer_teeth)
-
-    print(inner_teeth / outer_teeth)
-    print(outer_radius_innergear / outer_radius_outergear)
 
     # backwards.process()
 
