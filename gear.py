@@ -198,11 +198,11 @@ def main():
         inner_teeth)
     inner_poly = add_holes(inner_poly, inner_radius, [(0.5, 0),
                                                       (0.45, 5 * math.pi / 2)])
-    add_gear_figure(inner_poly, outer_radius_innergear, "Inner Gear")
+    # add_gear_figure(inner_poly, outer_radius_innergear, "Inner Gear")
 
     outer_teeth = 96
     outer_poly, outer_radius_outergear = generate_outer_gear(outer_teeth)
-    add_gear_figure(outer_poly, outer_radius_outergear, "Outer Gear")
+    # add_gear_figure(outer_poly, outer_radius_outergear, "Outer Gear")
 
     plt.show()
 
@@ -210,8 +210,7 @@ def main():
 
     # backwards.process()
 
-    # pdf.create("inner_gear", inner_poly, outer_radius_innergear, SCALE_FACTOR)
-    # pdf.create("outer_gear", outer_poly, outer_radius_outergear, SCALE_FACTOR)
+    pdf.create("gear_set", outer_radius_outergear, outer_poly, inner_poly, SCALE_FACTOR)
 
 
 if __name__ == '__main__':
