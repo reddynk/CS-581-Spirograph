@@ -16,6 +16,8 @@ import simulate
 
 import pdf
 
+import backwards
+
 # TODO: Make some class that takes a poly and a radius. Pass that to pdf.py
 
 # These have all been factored out in file wide constants.
@@ -162,7 +164,7 @@ def main():
     inner_teeth = 42
     inner_poly, outer_radius_innergear, inner_radius = generate_inner_gear(inner_teeth)
     inner_poly = add_holes(inner_poly,inner_radius,[(0.5, 0), (0.45, 5*math.pi/2)])
-    #might need to change width of mark created
+    # might need to change width of mark created
     mark = LineString([Point(inner_radius-5, 0), Point(inner_radius-10, 0)]).buffer(2)
     inner_poly = inner_poly.difference(mark)
     # add_gear_figure(inner_poly,outer_radius_innergear,"Inner Gear")
@@ -173,7 +175,7 @@ def main():
     outer_poly = outer_poly.difference(mark)
     # add_gear_figure(outer_poly,outer_radius_outergear*1.1,"Outer Gear")
 
-    plt.show()
+    # plt.show()
 
 
     simulate.simulate(inner_teeth,outer_teeth)
@@ -181,8 +183,10 @@ def main():
     print(inner_teeth/outer_teeth)
     print(outer_radius_innergear/outer_radius_outergear)
 
-    pdf.create("inner_gear", inner_poly, outer_radius_innergear, SCALE_FACTOR)
-    pdf.create("outer_gear", outer_poly, outer_radius_outergear, SCALE_FACTOR)
+    backwards.process()
+
+    # pdf.create("inner_gear", inner_poly, outer_radius_innergear, SCALE_FACTOR)
+    # pdf.create("outer_gear", outer_poly, outer_radius_outergear, SCALE_FACTOR)
 
 
 if __name__ == '__main__':
