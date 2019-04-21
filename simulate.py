@@ -4,6 +4,7 @@ import shapely.affinity as affin
 import numpy as np
 
 from matplotlib import pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 from descartes import PolygonPatch
 
@@ -13,7 +14,7 @@ import math
 THETA_STEP = .1
 
 
-def add_gear_figure(poly, outer_radius, gear_name):
+def show_2d_plot(poly, outer_radius, gear_name):
     fig = plt.figure()
     ax = fig.add_subplot(111)
     ax.add_patch(PolygonPatch(poly))
@@ -24,14 +25,24 @@ def add_gear_figure(poly, outer_radius, gear_name):
     ax.set_aspect(1)
 
     plt.show()
+
+def show_3d_plot(points, outer_radius, gear_name):
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection="3d")
+    xs = [p[0] for p in points]
+    ys = [p[1] for p in points]
+    zs = [p[2] for p in points]
+    ax.plot(xs,ys,zs=zs)
+    plt.show()
+
+
     
-def simulate(inner_teeth, outer_teeth, offset_rad):
+def simulate(inner_teeth, outer_teeth, pencil_percent, offset_rad, display_2d=False, display_3d=False):
     points = []
     total_rads = 0
-    pencil_radius = .5 * inner_teeth
+    pencil_radius = pencil_percent * inner_teeth
     r_diff = outer_teeth - inner_teeth
 
-    #print(inner_teeth,outer_teeth)
     lcm = np.lcm(inner_teeth, outer_teeth)
     rotations = lcm / inner_teeth
 
@@ -40,10 +51,17 @@ def simulate(inner_teeth, outer_teeth, offset_rad):
             (r_diff / inner_teeth) * total_rads)
         y = r_diff * math.sin(total_rads) - pencil_radius * math.sin(
             (r_diff / inner_teeth) * total_rads)
-        points.append((x, y))
+        z = r_diff * math.cos(total_rads) - pencil_radius * math.cos(
+            (r_diff / inner_teeth) * total_rads)
+        points.append((x, y, z))
         total_rads += THETA_STEP
 
     line = geom.LineString(points).buffer(.01)
     line = affin.rotate(line, offset_rad, geom.Point(0,0), use_radians=True)
 
-    add_gear_figure(line, outer_teeth, "Simulation")
+    if display_2d:
+        show_2d_plot(line, outer_teeth, "Simulation")
+    if display_3d:
+        show_3d_plot(points, outer_teeth, "Simulation")
+
+    return line

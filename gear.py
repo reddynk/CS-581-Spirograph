@@ -206,7 +206,7 @@ def main():
 
     # plt.show()
 
-    simulate.simulate(inner_teeth,outer_teeth, 0)
+    simulate.simulate(inner_teeth,outer_teeth, .5, 0, display_2d=True, display_3d=True)
 
     # backwards.process()
 
