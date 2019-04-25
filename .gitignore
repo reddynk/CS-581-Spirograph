@@ -126,3 +126,7 @@ out
 
 # Spirograph PDF files
 *.pdf
+
+# Spirograph 3d files
+*.mtl
+*.obj
