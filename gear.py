@@ -206,11 +206,11 @@ def main():
 
     # plt.show()
 
-    simulate.simulate(inner_teeth,outer_teeth, .4, 0, display_3d=True, save_to_obj=True)
+    #simulate.simulate(inner_teeth,outer_teeth, .4, 0, display_3d=True, save_to_obj=True)
 
     # backwards.process()
 
-    # pdf.create("spirograph_set", outer_radius_outergear, outer_poly, inner_poly, SCALE_FACTOR)
+    #pdf.create("spirograph_set", outer_radius_outergear, outer_poly, inner_poly, SCALE_FACTOR)
 
 
 if __name__ == '__main__':
