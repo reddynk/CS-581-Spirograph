@@ -31,7 +31,7 @@ FRAME_COUNT = 16
 # Backlash
 BACKLASH = 0.2
 # Radius of each pencil hole
-HOLE_RADIUS = 5
+HOLE_RADIUS = 10
 # Percent of radius of outer gear that will be the thickness of the outer gear.
 THICKNESS_RATIO = .15
 # Minimum thickness of outer gear.
@@ -193,14 +193,16 @@ def add_gear_figure(poly, outer_radius, gear_name):
 
 def main():
     # Generate the shape
-    inner_teeth = 55
+    inner_teeth = 106
     inner_poly, outer_radius_innergear, inner_radius = generate_inner_gear(
         inner_teeth)
-    inner_poly = add_holes(inner_poly, inner_radius, [(0.5, 0),
-                                                      (0.45, 5 * math.pi / 2)])
+    inner_poly = add_holes(inner_poly, inner_radius, [(0.2, 0),
+                                                      (0.4, math.pi / 2),
+                                                      (0.6, math.pi),
+                                                      (0.8, 3*math.pi/2)])
     # add_gear_figure(inner_poly, outer_radius_innergear, "Inner Gear")
 
-    outer_teeth = 105
+    outer_teeth = 200
     outer_poly, outer_radius_outergear = generate_outer_gear(outer_teeth)
     # add_gear_figure(outer_poly, outer_radius_outergear, "Outer Gear")
 
@@ -210,7 +212,7 @@ def main():
 
     # backwards.process()
 
-    #pdf.create("spirograph_set", outer_radius_outergear, outer_poly, inner_poly, SCALE_FACTOR)
+    pdf.create("spirograph_set", outer_radius_outergear, outer_poly, inner_poly, SCALE_FACTOR)
 
 
 if __name__ == '__main__':

@@ -13,7 +13,7 @@ import simulate
 import gear
 import pdf
 
-inner_teeth = 96
+inner_teeth = 106
 outer_teeth = 144
 pointlist = []
 text = "Added Points:"
@@ -43,6 +43,7 @@ def update(val):
    
 spoint.on_changed(update)
 
+
 #Outer Gear Size
 outerax = plt.axes([0.025, 0.8, 0.15, 0.10], facecolor=axcolor)
 outerbox = TextBox(outerax, ' ',initial = "144")
@@ -62,7 +63,7 @@ outerbox.on_submit(changeoutersize)
 
 #Inner Gear Size
 innerax = plt.axes([0.025, 0.6, 0.15, 0.10], facecolor=axcolor)
-innerbox = TextBox(innerax, ' ', initial = "96")
+innerbox = TextBox(innerax, ' ', initial = "106")
 innerax.text(0, 1,'Inner Gear Teeth')
 
 def changeinnersize(label):
@@ -70,7 +71,7 @@ def changeinnersize(label):
     inner_teeth = int(label)
     update(spoint.val)
 
-innerbox.on_submit(changeoutersize)
+innerbox.on_submit(changeinnersize)
 
 #Add point to gear
 addpointax = plt.axes([0.025, 0.5, 0.05, 0.05], facecolor=axcolor)
@@ -102,4 +103,6 @@ def createfile(label):
 
 filebutton.on_clicked(createfile)
 
+update(spoint.val)
 plt.show()
+
