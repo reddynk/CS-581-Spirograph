@@ -67,11 +67,9 @@ def simulate(inner_teeth, outer_teeth, pencil_percent, offset_rad, display_2d=Fa
     line = affin.rotate(line, offset_rad, geom.Point(0,0), use_radians=True)
 
     should_handle_3d = display_3d or save_to_obj
-    if display_2d and should_handle_3d:
-        raise "Displaying 2d and 3d simultaneously not supported, please choose one or the other"
     if display_2d:
         show_2d_plot(line, outer_teeth, gear_name)
-    if save_to_obj:
+    if should_handle_3d:
         show_3d_plot(points, outer_teeth, gear_name, display_3d, save_to_obj)
 
     return line
