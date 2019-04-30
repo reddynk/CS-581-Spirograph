@@ -31,7 +31,7 @@ FRAME_COUNT = 16
 # Backlash
 BACKLASH = 0.2
 # Radius of each pencil hole
-HOLE_RADIUS = 7
+HOLE_RADIUS = 10
 # Percent of radius of outer gear that will be the thickness of the outer gear.
 THICKNESS_RATIO = .15
 # Minimum thickness of outer gear.
@@ -200,7 +200,6 @@ def main():
         for outer_teeth in outer:
             if inner > outer:
                 continue
-
             inner_poly, outer_radius_innergear, inner_radius = generate_inner_gear(
                 inner_teeth)
             inner_poly = add_holes(inner_poly, inner_radius,
@@ -210,17 +209,10 @@ def main():
             outer_poly, outer_radius_outergear = generate_outer_gear(
                 outer_teeth, side_length=720)
 
-            # add_gear_figure(inner_poly, outer_radius_innergear, "Inner Gear")
-            # add_gear_figure(outer_poly, outer_radius_outergear, "Outer Gear")
-            # plt.show()
-
-            pdf.create("set_{}_{}".format(outer_teeth,
+            pdf.create("spiros/set_{}_{}".format(outer_teeth,
                                           inner_teeth), outer_radius_outergear,
                        outer_poly, inner_poly, SCALE_FACTOR)
             print("Completed {} {}".format(outer_teeth, inner_teeth))
-    # simulate.simulate(inner_teeth,outer_teeth, .4, 0, display_3d=True, save_to_obj=True)
-
-    # backwards.process()
 
 
 if __name__ == '__main__':
