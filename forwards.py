@@ -8,15 +8,14 @@ import shapely.affinity as affin
 from descartes import PolygonPatch
 
 import math
-import createdictionary
 import simulate
 import gear
 import pdf
 
-inner_teeth = 106
-outer_teeth = 144
+inner_teeth = 100
+outer_teeth = 150
 pointlist = []
-text = "Added Points:"
+text = "Added Points: \n (Distance, Radians)"
 
 fig = plt.figure()
 ax = fig.add_subplot(111)
@@ -26,16 +25,17 @@ axis_size = round(outer_teeth)
 ax.axis((-axis_size, axis_size, -axis_size, axis_size))
 ax.set_aspect(1)
 
+
 #Slider
 axcolor = 'lightgoldenrodyellow'
-axpoint = plt.axes([0.20, 0, 0.65, 0.05], facecolor=axcolor)
+axpoint = plt.axes([0.20, 0.03, 0.65, 0.025], facecolor=axcolor)
 
-spoint = Slider(axpoint, 'Point Position', 0.0, 1.0, valinit=0.0, valstep=0.01)
+spoint = Slider(axpoint, 'Point Position', 0.0, 0.95, valinit=0.0, valstep=0.01)
 
 def update(val):
     pos = spoint.val
 
-    line = simulate.simulate(inner_teeth, outer_teeth, pos, 0)
+    line = simulate.simulate(inner_teeth, outer_teeth, pos, sangle.val)
     
     for p in ax.patches:
         p.remove()
@@ -43,33 +43,58 @@ def update(val):
    
 spoint.on_changed(update)
 
+#SliderAngle
+axangle = plt.axes([0.20, 0, 0.65, 0.025], facecolor=axcolor)
+
+sangle = Slider(axangle, 'Angle Position', 0.0, 360, valinit=0.0, valstep=1)
+
+def updateangle(val):
+    angle = sangle.val
+
+    line = simulate.simulate(inner_teeth, outer_teeth, spoint.val, angle)
+    
+    for p in ax.patches:
+        p.remove()
+    ax.add_patch(PolygonPatch(line))
+   
+sangle.on_changed(updateangle)
+
 
 #Outer Gear Size
 outerax = plt.axes([0.025, 0.8, 0.15, 0.10], facecolor=axcolor)
-outerbox = TextBox(outerax, ' ',initial = "144")
+outerbox = TextBox(outerax, ' ',initial = "150")
 outerax.text(0, 1,'Outer Gear Teeth')
 
 def changeoutersize(label):
     global outer_teeth
+    global inner_teeth
     global ax
-    ax.clear()
-    axis_size = round(outer_teeth)
-    ax.axis((-axis_size, axis_size, -axis_size, axis_size))
-    ax.set_aspect(1)
-    outer_teeth = int(label)
-    update(spoint.val)
+    if int(label) < inner_teeth:
+        raise "Inner gear must be smaller than outer gear"
+    else:
+        errorax.clear()
+        ax.clear()
+        axis_size = round(outer_teeth)
+        ax.axis((-axis_size, axis_size, -axis_size, axis_size))
+        ax.set_aspect(1)
+        outer_teeth = int(label)
+        update(spoint.val)
 
 outerbox.on_submit(changeoutersize)
 
 #Inner Gear Size
 innerax = plt.axes([0.025, 0.6, 0.15, 0.10], facecolor=axcolor)
-innerbox = TextBox(innerax, ' ', initial = "106")
+innerbox = TextBox(innerax, ' ', initial = "100")
 innerax.text(0, 1,'Inner Gear Teeth')
 
 def changeinnersize(label):
+    global outer_teeth
     global inner_teeth
-    inner_teeth = int(label)
-    update(spoint.val)
+    if outer_teeth < int(label):
+        raise "Inner gear must be smaller than outer gear"
+    else:
+        inner_teeth = int(label)
+        update(spoint.val)
 
 innerbox.on_submit(changeinnersize)
 
@@ -84,7 +109,7 @@ def addpoint(label):
     global txt
     global text
     pointlist.append((spoint.val, 0))
-    text = text + '\n' + str((spoint.val, 0))
+    text = text + '\n' + str((round(spoint.val, 2), round(sangle.val * math.pi / 180, 2)))
     txt.remove()
     txt = fig.text(0, 0.15, text)
 
@@ -104,5 +129,6 @@ def createfile(label):
 filebutton.on_clicked(createfile)
 
 update(spoint.val)
+updateangle(sangle.val)
 plt.show()
 

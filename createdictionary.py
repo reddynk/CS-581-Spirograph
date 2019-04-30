@@ -2,8 +2,8 @@
 
 def create_dictionary():
     combos = {}
-    for outer in range(50, 112):
-        for inner in range(15, 62):
+    for outer in range(50, 250):
+        for inner in range(15, 200):
             if(outer > inner):
                 a = lcm(outer, inner) / inner
                 if a in combos:
