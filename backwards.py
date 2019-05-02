@@ -8,15 +8,18 @@ import shapely.affinity as affin
 from descartes import PolygonPatch
 
 import math
-from createdictionary import point_combos
 import simulate
 import gear
 import pdf
+import ast
+
+
+s = open('pointcombos.txt', 'r').read()
+pointcombos = ast.literal_eval(s)
 
 
 inner_teeth = 96
 outer_teeth = 144
-pointcombos = point_combos
 
 
 points = 7
@@ -66,17 +69,17 @@ rax = plt.axes([0.025, 0.4, 0.15, 0.3], facecolor=axcolor)
 
 def setcombos():
     global points
-    global pointcombos
     t = ()
     if points not in pointcombos.keys():
         raise "No combination of gears gives a figure with these number of points"
-    ls = pointcombos[points]
-    for i in ls:
-        outer = i[0]
-        inner = i[1]     
-        if len(t) < 10:
-            t = t + (str(outer) + '/' + str(inner), )
-    return t
+    else:
+        ls = pointcombos[points]
+        for i in ls:
+            outer = i[0]
+            inner = i[1]     
+            if len(t) < 10:
+                t = t + (str(outer) + '/' + str(inner), )
+        return t
  
 radio = RadioButtons(rax, setcombos(), active=0)
 
@@ -94,7 +97,7 @@ radio.on_clicked(changecombo)
 
 #Number of Points
 pointax = plt.axes([0.025, 0.8, 0.15, 0.10], facecolor=axcolor)
-pointbox = TextBox(pointax, ' ', initial = "72")
+pointbox = TextBox(pointax, ' ', initial = "7")
 pointax.text(0, 1, "Number of Points on Figure")
 
 def changepoints(label):
@@ -102,11 +105,14 @@ def changepoints(label):
     global rax
     global radio
     points = int(label)
-    rax.clear()
-    radio = RadioButtons(rax, setcombos(), active=0)
-    radio.on_clicked(changecombo)
-    changecombo(radio.value_selected)
-    #update(spoint.val)
+    if points > 80:
+        raise "choose a smaller point combination"
+    else:
+        rax.clear()
+        radio = RadioButtons(rax, setcombos(), active=0)
+        radio.on_clicked(changecombo)
+        changecombo(radio.value_selected)
+        #update(spoint.val)
 
 pointbox.on_submit(changepoints)
 

@@ -1,8 +1,7 @@
 
-
 def create_dictionary():
     combos = {}
-    for outer in range(50, 250):
+    for outer in range(50, 300):
         for inner in range(15, 200):
             if(outer > inner):
                 a = lcm(outer, inner) / inner
@@ -21,5 +20,8 @@ def lcm(x, y):
         greater += 1
     return lcm
         
-point_combos = create_dictionary()
+#point_combos = create_dictionary()
 
+f = open("pointcombos.txt","w")
+f.write(str(create_dictionary()))
+f.close()

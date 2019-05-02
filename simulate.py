@@ -13,7 +13,7 @@ import math
 from mayavi import mlab
 
 # How many radians the inner gear rotates each step.
-THETA_STEP = .1
+THETA_STEP = .2
 # How thick the tubes of the 3d spirograph are.
 TUBE_THICKNESS = 3
 
